@@ -1,0 +1,89 @@
+{
+  "name": "@ez-digital/react-hubspot-hook-form",
+  "version": "1.0.0",
+  "description": "A React library integrating HubSpot forms with React Hook Form for easy form validation and submission.",
+  "author": "EZ Digital",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ez-digital/react-hubspot-hook-form"
+  },
+  "bugs": {
+    "url": "https://github.com/ez-digital/react-hubspot-hook-form/issues"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./style": "./dist/style.css",
+    "./package.json": "./package.json"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "keywords": [
+    "react",
+    "next",
+    "nextjs",
+    "next.js",
+    "hubspot",
+    "forms",
+    "react-hook-form",
+    "typescript"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "start": "react-scripts start",
+    "version:patch": "npm version patch && git push --follow-tags origin main && npm publish",
+    "version:minor": "npm version minor && git push --follow-tags origin main && npm publish",
+    "version:major": "npm version major && git push --follow-tags origin main && npm publish",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
+    "clean": "rm -rf dist"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-hook-form": "^7.51.5"
+  },
+  "devDependencies": {
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/node": "^20.12.13",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "eslint": "^8.57.0",
+    "postcss": "^8.4.38",
+    "react-dom": "^18.3.1",
+    "react-scripts": "5.0.1",
+    "rollup": "^4.18.0",
+    "rollup-plugin-delete": "^2.0.0",
+    "rollup-plugin-dts": "^6.1.1",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-postcss": "^4.0.2",
+    "typescript": "^4.9.5"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
