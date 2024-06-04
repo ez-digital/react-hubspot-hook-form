@@ -1,14 +1,10 @@
-
-
 # HubSpot Form Component
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Issues](https://img.shields.io/github/issues/ez-digital/react-hubspot-hook-form.svg)](https://github.com/ez-digital/react-hubspot-hook-form/issues)
-[![NPM](https://img.shields.io/npm/v/react-hubspot-hook-form.svg?style=flat-squar)](https://www.npmjs.com/package/@ez-digital/react-hubspot-hook-form)
 [![RELEASES](https://img.shields.io/github/release/ez-digital/react-hubspot-hook-form.svg)](https://github.com/ez-digital/react-hubspot-hook-form/releases)
 ![TypeScript](https://img.shields.io/npm/types/next-hubspot)
 [![LINKEDIN](https://img.shields.io/badge/-EZ%20Digital-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/company/ez-digital)
-
 
 This package provides a React component to integrate and customize HubSpot forms seamlessly. It leverages `react-hook-form` for form handling and validation, allowing you to easily include HubSpot forms in your React applications.
 
