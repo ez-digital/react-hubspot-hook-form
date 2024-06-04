@@ -22,7 +22,8 @@
   background-color: #fff;
 }
 
-.rhhf-radio-group {
+.rhhf-radio-group,
+.rhhf-checkbox-group {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;

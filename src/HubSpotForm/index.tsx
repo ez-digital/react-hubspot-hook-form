@@ -67,11 +67,14 @@ export default function HubSpotForm<T extends FieldValues>({
   useEffect(() => {
     const getFormData = async () => {
       try {
-        const res = await fetch(`/marketing/v3/forms/${formId}`, {
-          headers: {
-            Authorization: `Bearer ${hubspotApiToken}`,
-          },
-        });
+        const res = await fetch(
+          `https://api.hubapi.com/marketing/v3/forms/${formId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${hubspotApiToken}`,
+            },
+          }
+        );
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         setFieldGroups(data?.fieldGroups || []);
@@ -115,7 +118,12 @@ export default function HubSpotForm<T extends FieldValues>({
       string,
       string | { label: string; value: string }
     ][]) {
-      if (typeof fieldValue === "object") {
+      if (Array.isArray(fieldValue)) {
+        formattedFields.push({
+          name: fieldName,
+          value: fieldValue.join("; "),
+        });
+      } else if (typeof fieldValue === "object") {
         formattedFields.push({
           name: fieldName,
           value: fieldValue?.label || "",
@@ -297,7 +305,7 @@ export default function HubSpotForm<T extends FieldValues>({
                                 {field?.options?.map((option, idx) => (
                                   <option
                                     key={`option${idx}`}
-                                    value={option.value}
+                                    value={option?.value}
                                   >
                                     {option.label}
                                   </option>
@@ -351,16 +359,47 @@ export default function HubSpotForm<T extends FieldValues>({
                               <div
                                 className={`rhhf-radio-group ${styles["rhhf-radio-group"]}`}
                               >
-                                {field.options.map((opt, idx) => (
-                                  <label key={`opt${idx}`}>
-                                    <input
-                                      type="radio"
-                                      {...commonProps}
-                                      value={opt.value}
-                                    />
-                                    {opt.label}
-                                  </label>
-                                ))}
+                                {field?.options?.map((opt, idx) => {
+                                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                  const { defaultValue, ...rest } = commonProps;
+                                  return (
+                                    <label key={`opt${idx}`}>
+                                      <input
+                                        type="radio"
+                                        {...rest}
+                                        value={opt?.value}
+                                        defaultChecked={field?.defaultValues?.includes(
+                                          opt?.value
+                                        )}
+                                      />
+                                      {opt?.label}
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            );
+                          case "multiple_checkboxes":
+                            return (
+                              <div
+                                className={`rhhf-checkbox-group ${styles["rhhf-checkbox-group"]}`}
+                              >
+                                {field?.options?.map((opt, idx) => {
+                                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                  const { defaultValue, ...rest } = commonProps;
+                                  return (
+                                    <label key={`opt${idx}`}>
+                                      <input
+                                        type="checkbox"
+                                        {...rest}
+                                        value={opt?.value}
+                                        defaultChecked={field?.defaultValues?.includes(
+                                          opt?.value
+                                        )}
+                                      />
+                                      {opt?.label}
+                                    </label>
+                                  );
+                                })}
                               </div>
                             );
                           default:
