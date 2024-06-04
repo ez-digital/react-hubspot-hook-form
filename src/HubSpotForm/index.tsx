@@ -67,14 +67,11 @@ export default function HubSpotForm<T extends FieldValues>({
   useEffect(() => {
     const getFormData = async () => {
       try {
-        const res = await fetch(
-          `https://api.hubapi.com/marketing/v3/forms/${formId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${hubspotApiToken}`,
-            },
-          }
-        );
+        const res = await fetch(`/marketing/v3/forms/${formId}`, {
+          headers: {
+            Authorization: `Bearer ${hubspotApiToken}`,
+          },
+        });
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
         setFieldGroups(data?.fieldGroups || []);
@@ -119,9 +116,12 @@ export default function HubSpotForm<T extends FieldValues>({
       string | { label: string; value: string }
     ][]) {
       if (typeof fieldValue === "object") {
-        formattedFields.push({ name: fieldName, value: fieldValue.label });
+        formattedFields.push({
+          name: fieldName,
+          value: fieldValue?.label || "",
+        });
       } else {
-        formattedFields.push({ name: fieldName, value: fieldValue });
+        formattedFields.push({ name: fieldName, value: fieldValue || "" });
       }
     }
 
@@ -163,7 +163,10 @@ export default function HubSpotForm<T extends FieldValues>({
     return loader ? (
       <>{loader}</>
     ) : (
-      <div className="skeleton" style={{ height: skeletonHeight }} />
+      <div
+        className={`${styles["rhhf-skeleton"]}`}
+        style={{ height: skeletonHeight }}
+      />
     );
   }
 
@@ -342,6 +345,23 @@ export default function HubSpotForm<T extends FieldValues>({
                                   )}
                                 </label>
                               </>
+                            );
+                          case "radio":
+                            return (
+                              <div
+                                className={`rhhf-radio-group ${styles["rhhf-radio-group"]}`}
+                              >
+                                {field.options.map((opt, idx) => (
+                                  <label key={`opt${idx}`}>
+                                    <input
+                                      type="radio"
+                                      {...commonProps}
+                                      value={opt.value}
+                                    />
+                                    {opt.label}
+                                  </label>
+                                ))}
+                              </div>
                             );
                           default:
                             return <></>;

@@ -18,15 +18,8 @@ jobs:
         with:
           node-version: "18"
 
-      - name: Determine version
-        id: get_version
-        run: |
-          VERSION=$(git describe --tags --abbrev=0)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Create ZIP file
-        run: |
-          zip -r release.zip .
+      - name: Set ENV
+        run: echo "TAG_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
       - name: Create Release
         id: create_release
@@ -34,17 +27,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.VERSION }}
-          release_name: Release ${{ env.VERSION }}
+          tag_name: ${{ TAG_VERSION }}
+          release_name: Release ${{ TAG_VERSION }}
           draft: false
           prerelease: false
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release.zip
-          asset_name: react-hubspot-hook-form-${{ env.VERSION }}.zip
-          asset_content_type: application/zip

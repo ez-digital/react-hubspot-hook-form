@@ -20,5 +20,5 @@
     "declaration": true,
     "declarationDir": "dist/dts"
   },
-  "include": ["src", "index.ts", "src/index.tsx"]
+  "include": ["src"]
 }
