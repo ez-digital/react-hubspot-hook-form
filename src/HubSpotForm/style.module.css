@@ -19,7 +19,10 @@
   border: 0.0625rem solid #ccc;
   border-radius: 0.25rem;
   font-size: 0.9375rem;
-  background-color: #fff;
+}
+
+.rhhf-field-invalid {
+  border-color: red;
 }
 
 .rhhf-radio-group,

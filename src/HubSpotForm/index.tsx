@@ -1,5 +1,4 @@
 import React, { ReactNode, useEffect, useState } from "react";
-
 import { useForm, Controller, FieldValues, Path } from "react-hook-form";
 
 import { FieldGroup, FormProps } from "../types";
@@ -63,6 +62,7 @@ export default function HubSpotForm<T extends FieldValues>({
   const [isLoading, setLoading] = useState(true);
   const [isFormSubmitting, setFormSubmitting] = useState(false);
   const [isFormSubmitted, setFormSubmitted] = useState(false);
+  const [isTouched, setIsTouched] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const getFormData = async () => {
@@ -104,14 +104,33 @@ export default function HubSpotForm<T extends FieldValues>({
     trigger,
   } = useForm<T>();
 
-  // Function to handle onBlur event and trigger validation
   const handleBlurValidation = async (name: string, onBlur?: () => void) => {
     await trigger(name as Path<T>); // Trigger validation for the specified input field
     if (onBlur) onBlur(); // Call the original onBlur handler if provided
+    setIsTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const handleChangeValidation = (name: string) => {
+    setIsTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const onInvalidSubmit = async () => {
+    // Mark all required fields as touched
+    const newTouched: Record<string, boolean> = {};
+    fieldGroups.forEach((group) => {
+      "fields" in group &&
+        group.fields?.forEach((field) => {
+          if (field.required) {
+            newTouched[field.name] = true;
+          }
+        });
+    });
+    setIsTouched((prev) => ({ ...prev, ...newTouched }));
   };
 
   const onCustomSubmit = async (fields: FieldValues) => {
     setFormSubmitting(true);
+
     const formattedFields = [];
 
     for (const [fieldName, fieldValue] of Object.entries(fields) as [
@@ -182,8 +201,8 @@ export default function HubSpotForm<T extends FieldValues>({
     <form
       onSubmit={
         onSubmit && !portalId
-          ? handleSubmit(onSubmit)
-          : handleSubmit(onCustomSubmit)
+          ? handleSubmit(onSubmit, onInvalidSubmit)
+          : handleSubmit(onCustomSubmit, onInvalidSubmit)
       }
       className={`rhhf-form ${styles["rhhf-form"]} ${formClassName}`.trim()}
       style={formStyles}
@@ -207,8 +226,18 @@ export default function HubSpotForm<T extends FieldValues>({
                       : field.defaultValues?.length
                       ? field.defaultValues[0]
                       : "",
-                  className:
-                    `rhhf-field ${styles["rhhf-field"]} ${fieldClassName}`.trim(),
+                  className: [
+                    "rhhf-field",
+                    styles["rhhf-field"],
+                    fieldClassName,
+                    isTouched[field?.name] &&
+                      (errors[field?.name] ? "invalid" : "valid"),
+                    isTouched[field?.name] &&
+                      (errors[field?.name] ? styles["rhhf-field-invalid"] : {}),
+                  ]
+                    .filter(Boolean)
+                    .join(" ")
+                    .trim(),
                   ...register(field?.name as Path<T>, {
                     required: field?.required
                       ? `This field is required`
@@ -268,6 +297,10 @@ export default function HubSpotForm<T extends FieldValues>({
                                     : field.fieldType
                                 }
                                 {...commonProps}
+                                onChange={(e) => {
+                                  handleChangeValidation(field.name);
+                                  renderProps.field.onChange(e);
+                                }}
                                 onBlur={() =>
                                   handleBlurValidation(
                                     field.name,
@@ -280,6 +313,10 @@ export default function HubSpotForm<T extends FieldValues>({
                             return (
                               <textarea
                                 {...commonProps}
+                                onChange={(e) => {
+                                  handleChangeValidation(field.name);
+                                  renderProps.field.onChange(e);
+                                }}
                                 onBlur={() =>
                                   handleBlurValidation(
                                     field?.name,
@@ -292,6 +329,10 @@ export default function HubSpotForm<T extends FieldValues>({
                             return (
                               <select
                                 {...commonProps}
+                                onChange={(e) => {
+                                  handleChangeValidation(field.name);
+                                  renderProps.field.onChange(e);
+                                }}
                                 onBlur={() =>
                                   handleBlurValidation(
                                     field?.name,
@@ -329,6 +370,10 @@ export default function HubSpotForm<T extends FieldValues>({
                                       field.defaultValue === "true"
                                     }
                                     {...commonProps}
+                                    onChange={(e) => {
+                                      handleChangeValidation(field.name);
+                                      renderProps.field.onChange(e);
+                                    }}
                                     onBlur={() =>
                                       handleBlurValidation(
                                         field?.name,
