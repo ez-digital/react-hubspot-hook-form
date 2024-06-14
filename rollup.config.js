@@ -1,31 +1,33 @@
 import { babel } from "@rollup/plugin-babel";
 import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
 import typescript from "@rollup/plugin-typescript";
-import { terser } from "rollup-plugin-terser";
+import terser from "@rollup/plugin-terser";
 import dts from "rollup-plugin-dts";
 import del from "rollup-plugin-delete";
 import postcss from "rollup-plugin-postcss";
-import peerDepsExternal from "rollup-plugin-peer-deps-external";
+import preserveDirectives from "rollup-preserve-directives";
 
 export default [
   {
     input: "src/index.ts",
     output: [
       {
-        file: "dist/index.js",
+        file: "dist/index.min.js",
         format: "es",
       },
     ],
-    external: ["react", "react/jsx-runtime", "react-hook-form"],
+    external: ["react", "react-hook-form"],
     plugins: [
-      peerDepsExternal(),
+      preserveDirectives(),
       resolve({
         extensions: [".js", ".jsx", ".ts", ".tsx"],
-      }),
+      }), // Resolve node_modules dependencies
+      commonjs(), // Convert CommonJS modules to ES6
       typescript({ tsconfig: "./tsconfig.json" }),
       postcss({
         modules: true,
-        extract: "style.css",
+        extract: "style.min.css",
         minimize: true,
       }),
       babel({

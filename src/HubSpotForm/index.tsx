@@ -1,3 +1,5 @@
+"use client";
+
 import React, { ReactNode, useEffect, useState } from "react";
 import { useForm, Controller, FieldValues, Path } from "react-hook-form";
 
@@ -30,10 +32,10 @@ const parseRichTextToCustomName = (
 };
 
 export default function HubSpotForm<T extends FieldValues>({
-  formId,
-  portalId,
-  hubspotApiToken,
+  fieldGroups,
+  submitButtonText,
   onSubmit,
+  isLoading,
   isSubmitting,
   isSubmitted,
   loader,
@@ -57,40 +59,8 @@ export default function HubSpotForm<T extends FieldValues>({
   buttonStyles = {},
   buttonClassName = "",
 }: FormProps<T>) {
-  const [fieldGroups, setFieldGroups] = useState<FieldGroup[]>([]);
-  const [submitButtonText, setSubmitButtonText] = useState("");
-  const [isLoading, setLoading] = useState(true);
-  const [isFormSubmitting, setFormSubmitting] = useState(false);
   const [isFormSubmitted, setFormSubmitted] = useState(false);
   const [isTouched, setIsTouched] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    const getFormData = async () => {
-      try {
-        const res = await fetch(
-          `https://api.hubapi.com/marketing/v3/forms/${formId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${hubspotApiToken}`,
-            },
-          }
-        );
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data = await res.json();
-        setFieldGroups(data?.fieldGroups || []);
-        setSubmitButtonText(data?.displayOptions?.submitButtonText || "");
-      } catch (error) {
-        console.error("Error fetching form data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getFormData();
-  }, [formId]);
-
-  useEffect(() => {
-    setFormSubmitting(isSubmitting || false);
-  }, [isSubmitting]);
 
   useEffect(() => {
     setFormSubmitted(isSubmitted || false);
@@ -128,64 +98,6 @@ export default function HubSpotForm<T extends FieldValues>({
     setIsTouched((prev) => ({ ...prev, ...newTouched }));
   };
 
-  const onCustomSubmit = async (fields: FieldValues) => {
-    setFormSubmitting(true);
-
-    const formattedFields = [];
-
-    for (const [fieldName, fieldValue] of Object.entries(fields) as [
-      string,
-      string | { label: string; value: string }
-    ][]) {
-      if (Array.isArray(fieldValue)) {
-        formattedFields.push({
-          name: fieldName,
-          value: fieldValue.join("; "),
-        });
-      } else if (typeof fieldValue === "object") {
-        formattedFields.push({
-          name: fieldName,
-          value: fieldValue?.label || "",
-        });
-      } else {
-        formattedFields.push({ name: fieldName, value: fieldValue || "" });
-      }
-    }
-
-    try {
-      const response = await fetch(
-        `https://api.hsforms.com/submissions/v3/integration/submit/${portalId}/${formId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            context: {
-              pageUri: window.location.href, // Extract page URI from window
-            },
-            fields: formattedFields,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to submit form data");
-      }
-
-      setFormSubmitted(true);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(error.message);
-      } else {
-        // Handle unexpected error types here
-        console.error(error);
-      }
-    } finally {
-      setFormSubmitting(false);
-    }
-  };
-
   if (isLoading) {
     return loader ? (
       <>{loader}</>
@@ -199,12 +111,8 @@ export default function HubSpotForm<T extends FieldValues>({
 
   return (
     <form
-      onSubmit={
-        onSubmit && !portalId
-          ? handleSubmit(onSubmit, onInvalidSubmit)
-          : handleSubmit(onCustomSubmit, onInvalidSubmit)
-      }
-      className={`rhhf-form ${styles["rhhf-form"]} ${formClassName}`.trim()}
+      onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
+      className={`rhhf-form ${formClassName}`.trim()}
       style={formStyles}
     >
       {fieldGroups?.map((group, groupIndex) => (
@@ -262,7 +170,7 @@ export default function HubSpotForm<T extends FieldValues>({
                     key={fieldIndex}
                     style={fieldContolStyles}
                     className={`rhhf-control ${styles["rhhf-control"]} ${
-                      field.hidden ? "hidden" : ""
+                      field.hidden ? styles["rhhf-control-hidden"] : ""
                     } ${fieldContolClassName}`.trim()}
                   >
                     {!field?.hidden &&
@@ -487,7 +395,7 @@ export default function HubSpotForm<T extends FieldValues>({
       )}
       {submitButtonText && (
         <button
-          disabled={isFormSubmitting}
+          disabled={isSubmitting}
           type="submit"
           style={buttonStyles}
           className={`rhhf-button ${styles["rhhf-button"]} ${buttonClassName}`.trim()}
