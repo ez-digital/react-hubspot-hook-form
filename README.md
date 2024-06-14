@@ -42,26 +42,31 @@ Here's an example of how to use the HubSpotForm component in your React applicat
 
 ```tsx
 // App.tsx
-import React, { useEffect } from "react";
-import ReactDOM from "react-dom";
+import { useState, useEffect } from "react";
 
-import HubSpotForm, { FieldGroup } from "@ez-digital/react-hubspot-hook-form";
+import HubSpotForm, {
+  FieldGroup,
+  FieldValues,
+} from "@ez-digital/react-hubspot-hook-form";
 import "@ez-digital/react-hubspot-hook-form/style";
 
 const App = () => {
   const [fieldGroups, setFieldGroups] = useState<FieldGroup[]>([]);
   const [submitButtonText, setSubmitButtonText] = useState("");
-  const [isFormLoading, setFormLoading] = useState(false);
+  const [isFormLoading, setFormLoading] = useState(true);
   const [isFormSubmitting, setFormSubmitting] = useState(false);
   const [isFormSubmitted, setFormSubmitted] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/getHubSpotForm?formId=${process.env.REACT_APP_CONTACTFORMID}`, {
+    fetch(
+      `http://localhost:8888/api/getHubSpotForm?formId=${process.env.REACT_APP_CONTACTFORMID}`,
+      {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-      })
+      }
+    )
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok " + response.statusText);
@@ -74,9 +79,9 @@ const App = () => {
       })
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
-      });
-     .finally(() => setFormLoading(false));
-  }, [formId]);
+      })
+      .finally(() => setFormLoading(false));
+  }, []);
 
   const onSubmit = async (fields: FieldValues) => {
     setFormSubmitting(true);
@@ -103,13 +108,19 @@ const App = () => {
     }
 
     try {
-      const response = fetch("http://localhost:8888/api/postHubSpotForm", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ formId: env.REACT_APP_CONTACTFORMID, fields: formattedFields }),
-      })
+      const response = await fetch(
+        "http://localhost:8888/api/postHubSpotForm",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            formId: process.env.REACT_APP_CONTACTFORMID,
+            fields: formattedFields,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to submit form data");
@@ -127,23 +138,39 @@ const App = () => {
     }
   };
 
-  return <HubSpotForm fieldGroups={fieldGroups} submitButtonText={submitButtonText} isLoading={isFormLoading} onSubmit={onSubmit} isSubmitting={isFormSubmitting} isSubmitted={isFormSubmitted} successMessage="The form has been submitted successfully." />;
+  return (
+    <HubSpotForm
+      fieldGroups={fieldGroups}
+      submitButtonText={submitButtonText}
+      isLoading={isFormLoading}
+      onSubmit={onSubmit}
+      isSubmitting={isFormSubmitting}
+      isSubmitted={isFormSubmitted}
+      successMessage="The form has been submitted successfully."
+    />
+  );
 };
 
-ReactDOM.render(<App />, document.getElementById("root"));
+export default App;
 ```
 
 ```js
 // server.js
-const express = require("express");
-const bodyParser = require("body-parser");
-const axios = require("axios");
-require("dotenv").config();
+import express from "express";
+import axios from "axios";
+import cors from "cors";
+import "dotenv/config";
 
 const app = express();
 const PORT = process.env.PORT || 8888;
 
-app.use(bodyParser.json());
+app.use(express.json());
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
 
 app.get("/api/getHubSpotForm", async (req, res) => {
   const { formId } = req.query;
@@ -173,7 +200,7 @@ app.post("/api/postHubSpotForm", async (req, res) => {
 
   try {
     const response = await axios.post(
-      `https://api.hsforms.com/submissions/v3/integration/submit/${process.env.PORTAL_ID}/${formId}`,
+      `https://api.hsforms.com/submissions/v3/integration/submit/${process.env.PORTALID}/${formId}`,
       {
         fields,
       },
