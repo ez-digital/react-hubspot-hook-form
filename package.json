@@ -29,7 +29,7 @@
     "nextjs",
     "next.js",
     "hubspot",
-    "forms",
+    "form",
     "react-hook-form",
     "typescript"
   ],
@@ -45,10 +45,6 @@
     "extends": [
       "react-app"
     ]
-  },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-hook-form": "^7.51.5"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.24.7",
@@ -69,6 +65,11 @@
     "rollup-plugin-postcss": "^4.0.2",
     "rollup-preserve-directives": "^1.1.1",
     "typescript": "^5.4.5"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0",
+    "react-dom": ">=18.2.0",
+    "react-hook-form": ">=7.44.0"
   },
   "publishConfig": {
     "access": "public"
