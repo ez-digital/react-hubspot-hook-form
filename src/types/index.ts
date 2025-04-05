@@ -81,11 +81,11 @@ export type FormProps<T extends FieldValues> = {
   /**
    * Message to show when the form submission is successful.
    */
-  successMessage?: string;
+  successMessage?: string | ReactNode;
   /**
    * Message to show when the form submission fails.
    */
-  errorMessage?: string;
+  errorMessage?: string | ReactNode;
   /**
    * Additional CSS class names to apply to the form element.
    */
